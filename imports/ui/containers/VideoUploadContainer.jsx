@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Dropzone from 'react-dropzone';
 import LinearProgress from 'material-ui/LinearProgress';
 import { Meteor } from 'meteor/meteor';
+import { Mongo } from 'meteor/mongo';
 import { createContainer } from 'meteor/react-meteor-data';
 import { Slingshot } from 'meteor/edgee:slingshot';
 import { Tracker } from 'meteor/tracker';
