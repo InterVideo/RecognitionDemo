@@ -3,8 +3,8 @@ import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 
 
-export const Videos = Mongo.Collection('videos');
-export const Counters = Mongo.Collection('counters');
+export const Videos = new Mongo.Collection('videos');
+export const Counters = new Mongo.Collection('counters');
 
 const getNextSequence = name => Counters.applyAndModify({
     query: { _id: name },
@@ -15,10 +15,20 @@ const getNextSequence = name => Counters.applyAndModify({
 Meteor.methods({
     'counters.initialize'(name) {
         check(name, String);
-        Counters.insert({
-            _id: 'videos',
-            seq: 0
-        });
+        counter = Counters.findOne(name);
+
+        if (counter) {
+            console.log('COUNTER EXISTS!!!');
+            Counters.update(name, {
+                $set: { seq: 0 }
+            });
+        } else {
+            console.log('CREATING NEW COUNTER!!!');
+            Counters.insert({
+                _id: name,
+                seq: 0
+            });
+        }
     },
 
     'videos.insert'(name, recognitionObjectPoints=[], recognitionObjectClass='__background__') {
