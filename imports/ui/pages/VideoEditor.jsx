@@ -12,8 +12,12 @@ class VideoEditor extends Component {
 
         } = this.props;
 
+        const style = {
+            // width: '140%'
+        };
+
         return (
-            <div>
+            <div style={style}>
                 <VideoEditorContainer />
             </div>
         );

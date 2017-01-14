@@ -220,9 +220,13 @@ export default class CanvasVideo extends Component {
         }
     }
 
+    getCanvas() {
+        return this.refs.canvas;
+    }
+
     render () {
         return (
-            <div className="CanvasVideo">
+            <div className="canvas-video">
                 <canvas
                     height={this.props.height}
                     ref="canvas"
