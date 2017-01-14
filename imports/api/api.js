@@ -18,12 +18,10 @@ Meteor.methods({
         counter = Counters.findOne(name);
 
         if (counter) {
-            console.log('COUNTER EXISTS!!!');
             Counters.update(name, {
                 $set: { seq: 0 }
             });
         } else {
-            console.log('CREATING NEW COUNTER!!!');
             Counters.insert({
                 _id: name,
                 seq: 0

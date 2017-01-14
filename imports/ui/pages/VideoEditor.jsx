@@ -1,11 +1,21 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router';
 
+import VideoEditorContainer from '../containers/VideoEditorContainer';
+
 
 class VideoEditor extends Component {
     render() {
+
+        const {
+            params: { id },
+
+        } = this.props;
+
         return (
-            <div className="text-center">VideEditor Page {this.props.params.id}</div>
+            <div>
+                <VideoEditorContainer />
+            </div>
         );
     }
 }

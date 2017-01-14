@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import Dropzone from 'react-dropzone';
 import LinearProgress from 'material-ui/LinearProgress';
 import { Meteor } from 'meteor/meteor';
@@ -94,4 +95,4 @@ class VideoUploadContainer extends Component {
     }
 }
 
-export default createContainer(() => ({}), VideoUploadContainer);
+export default createContainer(() => ({}), withRouter(VideoUploadContainer));
