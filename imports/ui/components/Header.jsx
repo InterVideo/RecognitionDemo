@@ -1,19 +1,28 @@
-import React from 'react';
-import { Link } from 'react-router';
+import React, { Component } from 'react';
+import { Link, withRouter } from 'react-router';
 
-import LoginButtons from './LoginButtons.jsx';
 
-export default class Header extends React.Component {
+export default class Header extends Component {
+  constructor(props, context) {
+    super(props, context);
+  }
+
   render() {
-    return (
-      <header className='Header'>
-        <b>Header</b> &nbsp;
-        <Link to="/">Home</Link> &nbsp;
-        <Link to="about">About Page</Link> &nbsp;
-        <Link to="bad-url">Not Found Page</Link> &nbsp;
+    const navStyle = {
+      backgroundColor: "#3f51b5",
+      paddingLeft: "12px"
+    };
 
-        <LoginButtons align='left' />
-      </header>
+    return (
+      <nav style={navStyle}>
+        <div className="nav-wrapper">
+          <Link to="/" className="brand-logo">InterVideo Recognition demo</Link>
+          <ul id="nav-mobile" className="right hide-on-med-and-down">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/upload">Upload</Link></li>
+          </ul> 
+        </div>
+      </nav>
     );
   }
 }

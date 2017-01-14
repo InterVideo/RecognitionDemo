@@ -1,26 +1,41 @@
 {
-  "name": "meteor-react-boilerplate",
-  "version": "1.0.1",
-  "description": "Meteor React Boilerplate",
+  "name": "InterVideo",
+  "version": "0.0.1",
+  "description": "The recognition demo for InterVideo",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AdamBrodzinski/meteor-react-boilerplate"
+    "url": "https://github.com/InterVideo/RecognitionDemo"
   },
-  "author": "Ryen Beatty <ryen.beatty@gmail.com> (http://ryenbeatty.co)",
-  "license": "ISC",
+  "author": "Denis Yakovenko <yakovenko.denis.a@gmail.com> (https://github.com/yakovenkodenis)",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/AdamBrodzinski/meteor-react-boilerplate/issues"
+    "url": "https://github.com/InterVideo/RecognitionDemo/issues"
   },
-  "homepage": "https://github.com/AdamBrodzinski/meteor-react-boilerplate",
+  "homepage": "https://github.com/InterVideo/RecognitionDemi",
   "dependencies": {
+    "babel-runtime": "^6.20.0",
+    "bcrypt": "^1.0.2",
     "classnames": "^2.2.5",
     "history": "^3.0.0",
+    "material-design-icons": "^3.0.1",
     "react": "^15.3.0",
+    "react-addons-pure-render-mixin": "^15.4.2",
     "react-dom": "^15.3.0",
+    "react-dropzone": "^3.9.0",
+    "react-fabricjs": "^0.1.6",
     "react-router": "^2.6.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-preset-meteor": "^6.14.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-runtime": "^6.20.0",
+    "eslint": "^3.13.1",
+    "eslint-plugin-meteor": "^4.0.1",
+    "eslint-plugin-react": "^6.9.0"
   }
 }
