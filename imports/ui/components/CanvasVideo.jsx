@@ -226,13 +226,19 @@ export default class CanvasVideo extends Component {
 
     render () {
         return (
-            <div className="canvas-video">
-                <canvas
-                    height={this.props.height}
-                    ref="canvas"
-                    width={this.props.width}
-                />
-            </div>
+            <canvas
+                height={this.props.height}
+                ref="canvas"
+                width={this.props.width}
+            />
         );
     }
 }
+
+// <div className="canvas-video">
+//     <canvas
+//         height={this.props.height}
+//         ref="canvas"
+//         width={this.props.width}
+//     />
+// </div>

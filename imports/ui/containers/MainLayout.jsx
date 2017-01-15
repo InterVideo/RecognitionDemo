@@ -9,7 +9,8 @@ const MainLayout = ({children}) => {
     let classname = classNames({
       container: children.props
                  && children.props.location
-                 && !children.props.location.pathname.match('/edit-video')  
+                 && !children.props.location.pathname.match('/edit-video')
+                 && !children.props.location.pathname.match('/videos/')  
     });
 
     return (
