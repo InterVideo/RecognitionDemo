@@ -20,7 +20,7 @@ Meteor.startup(() => {
   const style = document.createElement('link');
   style.type = 'text/css';
   style.rel = 'stylesheet';
-  style.hrep = 'https://fonts.googleapis.com/icon?family=Material+Icons';
+  style.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
   head.appendChild(style);
 
   injectTapEventPlugin();

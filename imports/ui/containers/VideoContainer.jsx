@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter, Link } from 'react-router';
 import axios from 'axios';
 
 import { AWSRemoteAddress } from '../../startup/both/config';
@@ -27,6 +27,14 @@ class VideoContainer extends Component {
     validateIdParam(id) {
         const n = Math.floor(Number(id));
         return String(n) === id && n >= 0;
+    }
+
+    openOptionsModal() {
+        $('.modal').openModal();
+    }
+
+    closeOptionsModal() {
+        $('.modal').closeModal();
     }
 
     onPlayBtnClick(e) {
@@ -67,10 +75,63 @@ class VideoContainer extends Component {
                             style={{position: 'absolute', top: 0, left: 0, zIndex: 0}}
                         />
                     </div>
-                    <button onClick={::this.onPlayBtnClick}>Play</button>
-                    <button onClick={::this.onPauseBtnClick}>Pause</button>
+                    <button
+                        style={{margin: '0 5%'}}
+                        className='waves-effect waves-light btn'
+                        onClick={::this.onPlayBtnClick}>
+                        Play
+                    </button>
+                    <button
+                        style={{margin: '0 5%'}}
+                        className='waves-effect waves-light btn'
+                        onClick={::this.onPauseBtnClick}>
+                        Pause
+                    </button>
+                    <button
+                        data-target="modal-options"
+                        style={{margin: '0 5%'}}
+                        className='waves-effect waves-light btn'
+                        onClick={::this.openOptionsModal}>
+                        Options
+                    </button>
+
+                    <div id="modal-options" className="modal bottom-sheet">
+                        <div className="modal-content">
+                            <h4>Video Options</h4>
+                            <div className="row">
+                                <div className="col c6">
+                                    <button
+                                        style={{margin: '0 10px'}}
+                                        className="waves-effect waves-light btn">
+                                        Update
+                                    </button>
+                                    <Link to={`/edit-video/${this.props.params.id}`}>
+                                        <button
+                                            onClick={::this.closeOptionsModal}
+                                            style={{margin: '0 10px'}}
+                                            className="waves-effect waves-light btn">
+                                            Edit
+                                        </button>
+                                    </Link>
+                                    <button
+                                        style={{margin: '0 10px'}}
+                                        className="waves-effect waves-light btn">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <a
+                                onClick={::this.closeOptionsModal}
+                                className="modal-action modal-close waves-effect waves-green btn-flat">
+                                Close
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
-                <div className="col s6" style={{paddingLeft: '10%'}}>
+                <div className="col s6" style={{paddingLeft: '5%'}}>
                     <h2>Video ID: </h2>
                     <h3>Recognition Results</h3>
                     <p className="flow-text">

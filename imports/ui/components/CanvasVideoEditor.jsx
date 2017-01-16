@@ -127,8 +127,18 @@ class CanvasVideoEditor extends Component {
                             style={{...cursor, position: 'absolute', top: 0, left: 0, zIndex: 1}}
                         />
                     </div>
-                    <button onClick={::this.onPlayBtnClick}>Play</button>
-                    <button onClick={::this.onPauseBtnClick}>Pause</button>
+                    <button
+                        className="waves-effect waves-light btn"
+                        style={{margin: '0 10%'}}
+                        onClick={::this.onPlayBtnClick}>
+                        Play
+                    </button>
+                    <button
+                        className="waves-effect waves-light btn"
+                        style={{margin: '0 10%'}}
+                        onClick={::this.onPauseBtnClick}>
+                        Pause
+                    </button>
                 </div>
                 <div className="col s6" style={{paddingLeft: '10%'}}>
                     <h3>Recognition Setup</h3>
