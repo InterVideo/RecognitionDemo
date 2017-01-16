@@ -164,7 +164,7 @@ class CanvasVideoEditor extends Component {
                             height={480}
                             width={640}
                             loop={true}
-                            muted={true}
+                            muted={false}
                             ref='video'
                             src={videoSrc}
                             style={{...cursor, position: 'absolute', top: 0, left: 0, zIndex: 0}}
