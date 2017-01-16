@@ -57,11 +57,11 @@ Meteor.methods({
     },
 
     'videos.updateRecognition'(id, recognitionObjectPoints, recognitionObjectClass) {
-        check(id, String);
+        check(id, Number);
         check(recognitionObjectPoints, Array);
         check(recognitionObjectClass, String);
 
-        Videos.update(id, {
+        Videos.update({id: parseInt(id)}, {
             $set: {
                 recognitionObjectClass,
                 recognitionObjectPoints,
@@ -71,8 +71,8 @@ Meteor.methods({
     },
 
     'videos.remove'(id) {
-        check(id, String);
-        Videos.remove(id);
+        check(id, Number);
+        Videos.remove({id: parseInt(id)});
     }
 });
 

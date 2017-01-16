@@ -8,9 +8,19 @@ import './video-uploading-rules';
 
 
 Meteor.startup(() => {
-    Meteor.call('counters.initialize', 'videos');
     WebApp.rawConnectHandlers.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', '*');
+        res.setHeader('Access-Control-Allow-Headers', '*');
         return next();
     });
+
+    WebApp.connectHandlers.use((req, res, next) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', '*');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+        return next();
+    });
+
+    Meteor.call('counters.initialize', 'videos');
 });

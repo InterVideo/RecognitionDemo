@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Meteor } from 'meteor/meteor';
 
 import { AWSRemoteAddress } from '../../startup/both/config';
 import CanvasVideo from './CanvasVideo';
@@ -12,7 +13,11 @@ class CanvasVideoEditor extends Component {
 
         this.axios = axios.create({
             baseURL: AWSRemoteAddress,
-            timeout: 100000
+            timeout: 100000,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            }
         });
 
         this.state = {
@@ -68,8 +73,6 @@ class CanvasVideoEditor extends Component {
             this.state.rectStartX, this.state.rectStartY,
             this.state.rectW, this.state.rectH
         );
-
-        console.log(this.getCroppedCanvasScreenshot());
     }
 
     mouseMove(e) {
@@ -103,8 +106,6 @@ class CanvasVideoEditor extends Component {
         if (video && typeof video.pause === 'function') {
             video.pause();
         }
-
-        console.log(this.getCroppedCanvasScreenshot());
     }
 
     renderClassListItems() {
@@ -117,6 +118,29 @@ class CanvasVideoEditor extends Component {
         this.setState({
             ...this.state,
             currentClass: e.target.innerHTML
+        });
+    }
+
+    handleSelectionDetection() {
+        console.log('Start detection process');
+        this.axios.post('/detect', {
+            image: this.getCroppedCanvasScreenshot().substr('data:image/jpeg;base64,'.length)
+        }).then(({data}) => {
+            if (data.detections) {
+                for (let { x, y, width, height, prediction, score } of data.detections) {
+                    Meteor.call(
+                        'videos.updateRecognition',
+                        this.props.video.id,
+                        [x, y, width, height],
+                        prediction
+                    );
+                }
+
+                this.setState({
+                    ...this.state,
+                    currentClass: data.detections[0].prediction
+                });
+            }
         });
     }
 
@@ -179,6 +203,13 @@ class CanvasVideoEditor extends Component {
                     >
                         {::this.renderClassListItems()}
                     </ul>
+                    <br />
+                    <br />
+                    <button
+                        onClick={::this.handleSelectionDetection}
+                        className="waves-effect waves-light btn">
+                        Run Detection
+                    </button>
                 </div>
             </div>
         );
