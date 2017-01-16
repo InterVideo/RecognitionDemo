@@ -12,17 +12,17 @@ export default class Home extends Component {
 
   render() {
 
-    const video = {
-      id: 127,
-      title: 'My Awesome Video',
-      image: 'http://www.w3schools.com/howto/img_fjords.jpg'
-    }
-    const videos = Array(16).fill(video);
+    // const video = {
+    //   id: 127,
+    //   title: 'My Awesome Video',
+    //   image: 'http://www.w3schools.com/howto/img_fjords.jpg'
+    // }
+    // const videos = Array(16).fill(video);
     
     return (
       <div>
         <Search />
-        <VideosContainer videos={videos} />
+        <VideosContainer />
       </div>
     );
   }

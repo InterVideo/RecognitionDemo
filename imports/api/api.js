@@ -6,11 +6,21 @@ import { check } from 'meteor/check';
 export const Videos = new Mongo.Collection('videos');
 export const Counters = new Mongo.Collection('counters');
 
-const getNextSequence = name => Counters.applyAndModify({
-    query: { _id: name },
-    update: { $inc: { seq: 1 } },
-    new: true
-}).seq;
+
+// if (Meteor.isServer) {
+//     Meteor.publish('videos', () => Videos.find({}));
+// }
+
+
+const getNextSequence = name => {
+    Counters.update(name, {
+        $inc: { seq: 1 }
+    }, {
+        upsert: true
+    });
+
+    return Counters.find({"_id": name}).fetch()[0].seq;
+};
 
 Meteor.methods({
     'counters.initialize'(name) {
@@ -29,14 +39,17 @@ Meteor.methods({
         }
     },
 
-    'videos.insert'(name, recognitionObjectPoints=[], recognitionObjectClass='__background__') {
+    'videos.insert'(name, url, preview, recognitionObjectPoints=[], recognitionObjectClass='__background__') {
         check(name, String);
+        check(url, String);
+        check(preview, String);
         check(recognitionObjectPoints, Array);
         check(recognitionObjectClass, String);
 
         Videos.insert({
             id: getNextSequence('videos'),
             name,
+            url,
             recognitionObjectPoints, recognitionObjectClass,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -51,7 +64,8 @@ Meteor.methods({
         Videos.update(id, {
             $set: {
                 recognitionObjectClass,
-                recognitionObjectPoints
+                recognitionObjectPoints,
+                updatedAt: new Date()
             }
         });
     },

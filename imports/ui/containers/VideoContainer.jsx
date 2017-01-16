@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router';
+import { Meteor } from 'meteor/meteor';
+import { Mongo } from 'meteor/mongo';
+import { createContainer } from 'meteor/react-meteor-data';
 import axios from 'axios';
 
+import { Videos } from '../../api/api';
 import { AWSRemoteAddress } from '../../startup/both/config';
 import CanvasVideo from '../components/CanvasVideo';
 
@@ -55,8 +59,12 @@ class VideoContainer extends Component {
 
     render() {
 
+        console.log('PROOPS')
+        console.log(this.props);
+
         const videoSrc = {
-            src: 'http://www.w3schools.com/html/mov_bbb.mp4',
+            // src: 'http://www.w3schools.com/html/mov_bbb.mp4',
+            src: this.props.video.url,
             type: 'video/mp4'
         };
 
@@ -105,7 +113,7 @@ class VideoContainer extends Component {
                                         className="waves-effect waves-light btn">
                                         Update
                                     </button>
-                                    <Link to={`/edit-video/${this.props.params.id}`}>
+                                    <Link to={`/edit-video/${this.props.video.id}`}>
                                         <button
                                             onClick={::this.closeOptionsModal}
                                             style={{margin: '0 10px'}}
@@ -132,7 +140,7 @@ class VideoContainer extends Component {
 
                 </div>
                 <div className="col s6" style={{paddingLeft: '5%'}}>
-                    <h2>Video ID: </h2>
+                    <h2>{this.props.video.name}</h2>
                     <h3>Recognition Results</h3>
                     <p className="flow-text">
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit.
@@ -146,4 +154,7 @@ class VideoContainer extends Component {
     }
 }
 
-export default withRouter(VideoContainer);
+export default createContainer(({params}) => ({
+    video: Videos.findOne({id: parseInt(params.id)})
+}), withRouter(VideoContainer));
+

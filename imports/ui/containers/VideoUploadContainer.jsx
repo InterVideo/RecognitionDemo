@@ -15,6 +15,7 @@ class VideoUploadContainer extends Component {
 
         this.state = {
             progress: 0,
+            videoName: '',
             url: '',
             isUploading: false
         };
@@ -41,20 +42,19 @@ class VideoUploadContainer extends Component {
 
         this.setState({
             ...this.state,
-            isUploading: true
+            isUploading: true,
+            videoName: files[0].name.replace(/\..+$/, '')
         });
 
         uploader.send(files[0], (error, url) => {
             computation.stop();
 
             if (error) {
-                console.log('ERROR HEPPENED IN uploader.send()');
                 this.setState({
                     ...this.state,
                     progress: 0,
                     isUploading: false
                 });
-                console.error('Error uploading', uploader.xhr.response);
                 Materialize.toast(uploader.xhr.response, 4000);
             } else {
                 this.setState({
@@ -62,7 +62,11 @@ class VideoUploadContainer extends Component {
                     url,
                     isUploading: false
                 });
-                // Meteor.users update Meteor.userId()....
+                const preview = this.getVideoPreview(this.state.url);
+                console.log('PREVIEW:');
+                console.log(preview);
+                Materialize.toast('Uploading complete!', 4000);
+                Meteor.call('videos.insert', this.state.videoName, this.state.url, preview);
             }
         });
 
@@ -76,20 +80,79 @@ class VideoUploadContainer extends Component {
         });
     }
 
+    getVideoPreview(url) {
+        const video = document.createElement('video');
+        video.src = url;
+        video.currentSrc = url;
+        video.crossOrigin = 'anonymous';
+        video.width = 640;
+        video.height = 480;
+        video.currentTime = 3;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.width;
+        canvas.height = video.height;
+
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', 1.0); 
+    }
+
     render() {
         return (
             <div className='container'>
-                <h4>Upload a video</h4>
-                <br/>
-                <Dropzone onDrop={::this.onDrop}>
-                    <div>Drop your video here or click to select files to upload.</div>
-                </Dropzone>
-                <br/>
-                {
-                    this.state.isUploading
-                    ? <LinearProgress mode='determinate' value={this.state.progress} />
-                    : ''
-                }
+                <div className="row">
+                    <div className="col s12" style={{textAlign: 'center'}}>
+                        <h4>Upload a video</h4>
+                        <br/>
+                        <Dropzone
+                            onDrop={::this.onDrop}
+                            className="dropzone"
+                            activeClassName="active-dropzone">
+                            <div className="container">
+                                <div
+                                    className="card-panel waves-effect waves-block waves-green pt0 hovicon"
+                                    id="zdrop">
+                                    Drop your video here or click to select files to upload.
+                                </div>
+                                <div className="collection" id="previews">
+                                    <div
+                                        className="collection-item clearhack valign-wrapper item-template"
+                                        id="zdrop-template">
+                                        <div className="left pv zdrop-info" data-dz-thumbnail="">
+                                            <div>
+                                                <span data-dz-name=""></span>
+                                                <span data-dz-size=""></span>
+                                            </div>
+                                        </div>
+                                        <div className="secondary-content actions col s12">
+                                            <a
+                                                style={{marginRight: '35px'}}
+                                                className="btn waves-effect waves-light start">
+                                                Upload
+                                            </a>
+                                            <a
+                                                style={{marginLeft: '35px'}}
+                                                className="btn ph red white-text waves-effect waves-light">
+                                                <i className="material-icons">close</i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Dropzone>
+                        <br/>
+                        {
+                            this.state.isUploading
+                            ? (
+                                <div className="row">
+                                    <LinearProgress mode='determinate' value={this.state.progress} />
+                                    <span>{` ${this.state.progress.toFixed(2)}%`}</span>
+                                </div>
+                            ) : ''
+                        }
+                    </div>
+                </div>
             </div>
         );
     }

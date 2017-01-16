@@ -9,16 +9,18 @@ import FlatButton from 'material-ui/FlatButton';
 export default class VideoThumbnail extends Component {
     render() {
         const {
-            id, title, image
+            id, name, preview
         } = this.props;
+
+        console.log('THUMBNAIL', this.props);
 
         return (
             <Card>
                 <Link to={`/videos/${id}`}>
                     <CardMedia
-                        overlay={<CardTitle title={title} />}
+                        overlay={<CardTitle title={name} />}
                     >
-                        <img src={image}/>
+                        <img src={preview}/>
                     </CardMedia>
                 </Link> 
             </Card>

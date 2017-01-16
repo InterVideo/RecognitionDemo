@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { createContainer } from 'meteor/react-meteor-data';
 
+import { Videos } from '../../api/api';
 import VideoThumbnail from '../components/VideoThumbnail';
 
 
-export default class VideosContainer extends Component {
+class VideosContainer extends Component {
 
     constructor(props, context) {
         super(props, context);
@@ -45,3 +47,7 @@ export default class VideosContainer extends Component {
         );
     }
 }
+
+export default createContainer(() => ({
+    videos: Videos.find({}, { sort: { updatedAt: -1 } }).fetch()
+}), VideosContainer);
