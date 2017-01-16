@@ -36,6 +36,8 @@ export default class CanvasVideo extends Component {
             // Create the video element.
             const video = document.createElement('video');
 
+            video.crossOrigin = 'anonymous';
+
             // Set the source for the video defined
             // in the given props.
             if (src.length) {
