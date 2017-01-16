@@ -14,7 +14,7 @@ class VideoEditor extends Component {
 
         return (
             <div>
-                <VideoEditorContainer />
+                <VideoEditorContainer {...this.props} />
             </div>
         );
     }

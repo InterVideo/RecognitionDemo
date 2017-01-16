@@ -33,25 +33,20 @@ class CanvasVideoEditor extends Component {
         const canvas = this.refs.video.getCanvas();
         const context = canvas.getContext('2d');
 
-        const data = context.getImageData(
-            this.state.rectStartX, this.state.rectStartY,
-            this.state.rectW, this.state.rectH
-        );
-
-        const compositeOperation = context.globalCompositeOperation;
-        context.globalCompositeOperation = 'destination-over';
-        context.fillStyle = '#fff';
-        context.fillRect(
-            this.state.rectStartX, this.state.rectStartY,
-            this.state.rectW, this.state.rectH
-        );
-
         const tempCanvas = document.createElement('canvas');
         const tempContext = tempCanvas.getContext('2d');
 
-        tempCanvas.width = this.state.rectW;
-        tempCanvas.height = this.state.rectH;
-        tempContext.drawImage(canvas, 0, 0);
+        const image = document.createElement('img');
+        image.src = canvas.toDataURL();
+
+        tempCanvas.width = Math.abs(this.state.rectW);
+        tempCanvas.height = Math.abs(this.state.rectH);
+        tempContext.drawImage(
+            image,
+            this.state.rectStartX, this.state.rectStartY,
+            this.state.rectW, this.state.rectH,
+            0, 0, this.state.rectW, this.state.rectH
+        );
         return tempCanvas.toDataURL('image/jpeg', 1.0);
     }
 
@@ -59,8 +54,8 @@ class CanvasVideoEditor extends Component {
         this.setState({
             ...this.state,
             dragSelection: true,
-            rectStartX: e.pageX - this.refs.topCanvas.offsetLeft,
-            rectStartY: e.pageY - this.refs.topCanvas.offsetTop
+            rectStartX: e.pageX - this.refs.topCanvas.offsetLeft - 70,
+            rectStartY: e.pageY - this.refs.topCanvas.offsetTop - 70
         });
     }
 
@@ -73,6 +68,8 @@ class CanvasVideoEditor extends Component {
             this.state.rectStartX, this.state.rectStartY,
             this.state.rectW, this.state.rectH
         );
+
+        console.log(this.getCroppedCanvasScreenshot());
     }
 
     mouseMove(e) {
@@ -88,7 +85,7 @@ class CanvasVideoEditor extends Component {
             ctx.strokeStyle = 'red';
             const { rectStartX, rectStartY, rectW, rectH } = this.state;
             ctx.lineWidth = 5;
-            ctx.strokeRect(rectStartX - 70, rectStartY - 70, rectW, rectH);
+            ctx.strokeRect(rectStartX, rectStartY, rectW, rectH);
         }
     }
 
@@ -125,10 +122,8 @@ class CanvasVideoEditor extends Component {
 
     render() {
 
-        const src = 'https://s3-us-west-2.amazonaws.com/intervideo-demo/testing/ted_talk.mp4?X-Amz-Date=20170116T002650Z&X-Amz-Expires=300&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=08ca9d102514e1e2c8ab9d76748b8d5f2e026df5efed0924dce67d3d14cee7ec&X-Amz-Credential=ASIAIYB73ETPEMZS3RVA/20170116/us-west-2/s3/aws4_request&X-Amz-SignedHeaders=Host&x-amz-security-token=FQoDYXdzEPn//////////wEaDNHDEaCNGDfZYidToSL6Aa%2BEJy/G2Lo/ZjMsmIgn5dZITsx3Ssw%2B06X1%2BER4meFmU7LfpJcgZwNPhr%2B6VL8sSqqA1mxuc6EYdeCvxDFNd6Nw2ECPLiYyCnU3g1KWghdTwBfARaXGbdMy9MrZLC8FJ8mL/MXpSmxh2bpiGFtlVqDjfolA4Hok8yBQnkGNDz/BaCfiGbZicMfKHYSAXiJajMWB6CuB35JouLTKRrhRy0yOJLiQnVDFLZ8Aa5TCzNmQP%2BXgW6PY4zwo0ayanUI1GutDAWu6Hh/dUcRqkT7xeOy3gAh21TJZxRlvb8am%2BBXxjo0xPvo2oMm5qF%2BHIC4QEX4nwd1MJFB5Jiwo5qHwwwU%3D';
         const videoSrc = {
-            // src: 'http://www.w3schools.com/html/mov_bbb.mp4',
-            src,
+            src: this.props.video.url,
             type: 'video/mp4'
         };
 

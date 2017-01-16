@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import { Meteor } from 'meteor/meteor';
+import { createContainer } from 'meteor/react-meteor-data';
 
 import { Videos } from '../../api/api';
 import CanvasVideoEditor from '../components/CanvasVideoEditor';
@@ -37,10 +39,12 @@ class VideoEditorContainer extends Component {
 
         return (
             <div style={style}>
-                <CanvasVideoEditor classes={classes} />
+                <CanvasVideoEditor classes={classes} video={this.props.video}/>
             </div>
         );
     }
 }
 
-export default VideoEditorContainer;
+export default createContainer(({params}) => ({
+    video: Videos.findOne({id: parseInt(params.id)})
+}), withRouter(VideoEditorContainer));
