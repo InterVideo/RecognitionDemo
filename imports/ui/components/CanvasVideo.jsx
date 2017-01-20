@@ -232,6 +232,7 @@ export default class CanvasVideo extends Component {
                 height={this.props.height}
                 ref="canvas"
                 width={this.props.width}
+                onClick={this.props.onClick}
             />
         );
     }

@@ -5,7 +5,11 @@ import { Meteor } from 'meteor/meteor';
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { Videos } from '../../api/api';
-import { AWSRemoteAddress } from '../../startup/both/config';
+import {
+    AWSRemoteAddress,
+    AWSFlask,
+    AWSLapis
+} from '../../startup/both/config';
 import CanvasVideo from './CanvasVideo';
 
 
@@ -125,6 +129,45 @@ class CanvasVideoEditor extends Component {
             return;
         } else {
 
+
+
+            // console.log('Starting dataset creation...')
+            // this.axios.post('/create-dataset', {
+            //     detections: [this.state.rectStartX, this.state.rectStartY],
+            //     image: this.getCanvasScreenshot().substr('data:image/png;base64,'.length),
+            //     positive_crop: this.getCroppedCanvasScreenshot().substr('data:image/png;base64,'.length),
+            //     augment_data: true
+            // })
+            // .then(data => {
+            //     this.setState({
+            //         ...this.state,
+            //         processingVideo: false
+            //     });
+
+            //     Meteor.call(
+            //         'actions.saveAction',
+            //         parseInt(this.props.video.id),
+            //         this.state.currentRecognitionAction,
+            //         actionFields
+            //     );
+
+            //     this.props.router.push(`/videos/${this.props.video.id}`);
+            // })
+            // .catch(e => {
+            //     Materialize.toast(`Error occured while training SVM: ${e.message}`, 4000)
+            //     this.setState({
+            //         ...this.state,
+            //         processingVideo: false
+            //     });
+            // });
+
+            // // TEMPORARY CRUTCH for using either SIFT or ResNet.
+            // // To switch: comment out upper part and remove return, or vice versa.
+            // return;
+
+
+
+
             if (this.state.detections) {
 
                 this.axios.post('/train-svm', {
@@ -132,8 +175,8 @@ class CanvasVideoEditor extends Component {
                     image: this.getCanvasScreenshot().substr('data:image/png;base64,'.length),
                     positive_crop: this.getCroppedCanvasScreenshot().substr('data:image/png;base64,'.length),
                     use_dense_sift: true,
-                    augment_data: false,
-                    clustering: 'kmeans'
+                    augment_data: true,
+                    clustering: 'gmm'
                 })
                 .then(data => {
                     if (data.error) {
@@ -155,6 +198,8 @@ class CanvasVideoEditor extends Component {
                             this.state.currentRecognitionAction,
                             actionFields
                         );
+
+                        this.props.router.push(`/videos/${this.props.video.id}`);
                     }
                 })
                 .catch(e => {

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router';
+import { createContainer } from 'meteor/react-meteor-data';
 
+import { Videos, Actions } from '../../api/api';
 import VideoContainer from '../containers/VideoContainer';
 
 
@@ -18,10 +20,17 @@ class VideoPage extends Component {
 
         return (
             <div style={style}>
-                <VideoContainer {...this.props}/>
+                {
+                    this.props.video
+                    ? <VideoContainer {...this.props} />
+                    : ''
+                }
             </div>
         );
     }
 }
 
-export default withRouter(VideoPage);
+export default createContainer(({params}) => ({
+    video: Videos.findOne({id: parseInt(params.id)}),
+    action: Actions.findOne({videoId: parseInt(params.id)})
+}), withRouter(VideoPage));
