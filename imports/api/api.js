@@ -5,6 +5,7 @@ import { check } from 'meteor/check';
 
 export const Videos = new Mongo.Collection('videos');
 export const Counters = new Mongo.Collection('counters');
+export const Actions = new Mongo.Collection('actions');
 
 
 // if (Meteor.isServer) {
@@ -37,6 +38,18 @@ Meteor.methods({
                 seq: 0
             });
         }
+    },
+
+    'actions.saveAction'(videoId, recognitionAction, actionFields) {
+        check(videoId, Number);
+        check(recognitionAction, String);
+        check(actionFields, Array);
+
+        Actions.insert({
+            videoId,
+            recognitionAction,
+            actionFields
+        });
     },
 
     'videos.insert'(name, url, preview, recognitionObjectPoints=[], recognitionObjectClass='__background__') {

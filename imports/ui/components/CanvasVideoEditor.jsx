@@ -13,16 +13,23 @@ class CanvasVideoEditor extends Component {
 
         this.axios = axios.create({
             baseURL: AWSRemoteAddress,
-            timeout: 100000,
+            timeout: 150000,
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json'
             }
         });
 
+        this.onRecognitionActions = [
+            'popup', 'modal', 'redirect'
+        ];
+
         this.state = {
             currentClass: '__background__',
-            dragSelection: false
+            dragSelection: false,
+            currentRecognitionAction: 'popup',
+            detections: null,
+            processingVideo: false
         };
     }
 
@@ -92,6 +99,55 @@ class CanvasVideoEditor extends Component {
         }
     }
 
+    saveRecognitionAction() {
+
+        const actionFields = $(this.refs.actionFormData).serializeArray();
+
+        const allFull = actionFields.some(
+            action => action.hasOwnProperty('value') && action.value
+        );
+
+        if (!allFull) {
+            Materialize.toast('Please, fill in all the fields', 4000);
+            return;
+        } else {
+
+            if (this.state.detections) {
+
+                this.axios('/train-svm', {
+                    // TODO
+                    // detections: []
+                    // image: base64 str
+                    // positive_crop: base64 str
+                    // use_dense_sift: true,
+                    // clustering: 'kmeans'
+                })
+                .then(data => {
+                    if (data.error) {
+                        Materialize.toast('Error occured on a detection server');
+                        throw new Meteor.Error('/train-svm returned error object');
+                    } else {
+                        this.setState({
+                            ...this.state,
+                            processingVideo: false
+                        });
+
+                        Meteor.call(
+                            'actions.saveAction',
+                            parseInt(this.props.video.id),
+                            this.state.currentRecognitionAction,
+                            actionFields
+                        );
+                    }
+                })
+                .catch(e => Materialize.toast(`Error occured while training SVM: ${e.message}`, 4000))
+            } else {
+                Materialize('Choose a detection object, please!', 4000);
+                return;
+            }
+        }
+    }
+
     onPlayBtnClick(e) {
         const { video } = this.refs;
 
@@ -138,9 +194,63 @@ class CanvasVideoEditor extends Component {
 
                 this.setState({
                     ...this.state,
-                    currentClass: data.detections[0].prediction
+                    currentClass: data.detections[0].prediction,
+                    detections: data.detections[0]
                 });
             }
+        });
+    }
+
+    renderOnRecognitionItems() {
+        return this.onRecognitionActions.map((item, index) =>
+            <li key={index}><a>{item}</a></li>
+        );
+    }
+
+    renderActionInputFields() {
+        return (
+            <div className="row">
+                <form className="col s12" ref='actionFormData'>
+                    {
+                        this.state.currentRecognitionAction == 'popup'
+                        ? (
+                            <div className="row">
+                                <div className="input-field col s12">
+                                    <input type="text" id="popup-text"/>
+                                    <label htmlFor="popup-text">Popup Text</label>
+                                </div>
+                            </div>
+                        ) : this.state.currentRecognitionAction == 'modal'
+                        ? (
+                            <div className="row">
+                                <div className="input-field col s12">
+                                    <input type="text" id="modal-header"/>
+                                    <label htmlFor="modal-header">Modal Header</label>
+                                </div>
+                                <div className="input-field col s12">
+                                    <input type="text" id="modal-header"/>
+                                    <label htmlFor="modal-header">Modal Header</label>
+                                </div>
+                            </div>
+                        ) : this.state.currentRecognitionAction == 'redirect'
+                        ? (
+                            <div className="row">
+                                <div className="input-field col s12">
+                                    <input type="text" id="redirect-url"/>
+                                    <label htmlFor="redirect-url">Redirect URL</label>
+                                </div>
+                            </div>
+                        ) : ''
+                    }
+                </form>
+            </div>
+        );
+    }
+
+    handleActionsDropDownClick(e) {
+        this.setState({
+            ...this.state,
+            currentRecognitionAction: e.target.innerHTML
         });
     }
 
@@ -209,6 +319,25 @@ class CanvasVideoEditor extends Component {
                         onClick={::this.handleSelectionDetection}
                         className="waves-effect waves-light btn">
                         Run Detection
+                    </button>
+                    <br/>
+                    <br/>
+                    <div className="recognition-actions">
+                        <h4>Choose onRecognition action</h4>
+                        <ul
+                            id="classes-dropdown"
+                            className="dropdown-content"
+                            onClick={::this.handleActionsDropDownClick}
+                        >
+                            {::this.renderOnRecognitionItems()}
+                        </ul>
+                    </div>
+                    {::this.renderActionInputFields()}
+                    <br/>
+                    <button
+                        onClick={::this.saveRecognitionAction}
+                        className="waves-effect waves-light btn">
+                        Save
                     </button>
                 </div>
             </div>
