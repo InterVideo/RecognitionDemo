@@ -45,10 +45,12 @@ Meteor.methods({
         check(recognitionAction, String);
         check(actionFields, Array);
 
-        Actions.insert({
+        Actions.update({ videoId }, {
             videoId,
             recognitionAction,
             actionFields
+        }, {
+            upsert: true
         });
     },
 

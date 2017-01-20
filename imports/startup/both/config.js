@@ -1,2 +1,2 @@
 
-export const AWSRemoteAddress = 'http://35.160.41.3:8887';
+export const AWSRemoteAddress = 'http://52.10.84.68:8887';

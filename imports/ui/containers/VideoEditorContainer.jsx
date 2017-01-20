@@ -39,7 +39,15 @@ class VideoEditorContainer extends Component {
 
         return (
             <div style={style}>
-                <CanvasVideoEditor classes={classes} video={this.props.video}/>
+                {
+                    this.props.video
+                    ? <CanvasVideoEditor
+                        classes={classes}
+                        id={this.props.params.id}
+                        video={this.props.video}
+                    />
+                    : ''
+                }
             </div>
         );
     }

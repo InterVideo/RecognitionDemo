@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import axios from 'axios';
 import { Meteor } from 'meteor/meteor';
+import { createContainer } from 'meteor/react-meteor-data';
 
+import { Videos } from '../../api/api';
 import { AWSRemoteAddress } from '../../startup/both/config';
 import CanvasVideo from './CanvasVideo';
 
@@ -20,16 +23,16 @@ class CanvasVideoEditor extends Component {
             }
         });
 
-        this.onRecognitionActions = [
-            'popup', 'modal', 'redirect'
-        ];
-
         this.state = {
             currentClass: '__background__',
             dragSelection: false,
             currentRecognitionAction: 'popup',
             detections: null,
-            processingVideo: false
+            processingVideo: false,
+            videoUrl: '',
+            onRecognitionActions: [
+                'popup', 'modal', 'redirect'
+            ]
         };
     }
 
@@ -59,7 +62,12 @@ class CanvasVideoEditor extends Component {
             this.state.rectW, this.state.rectH,
             0, 0, this.state.rectW, this.state.rectH
         );
-        return tempCanvas.toDataURL('image/jpeg', 1.0);
+        return tempCanvas.toDataURL();
+    }
+
+    getCanvasScreenshot() {
+        const canvas = this.refs.video.getCanvas();
+        return canvas.toDataURL();
     }
 
     mouseDown(e) {
@@ -107,6 +115,11 @@ class CanvasVideoEditor extends Component {
             action => action.hasOwnProperty('value') && action.value
         );
 
+        this.setState({
+            ...this.state,
+            processingVideo: true
+        });
+
         if (!allFull) {
             Materialize.toast('Please, fill in all the fields', 4000);
             return;
@@ -114,17 +127,21 @@ class CanvasVideoEditor extends Component {
 
             if (this.state.detections) {
 
-                this.axios('/train-svm', {
-                    // TODO
-                    // detections: []
-                    // image: base64 str
-                    // positive_crop: base64 str
-                    // use_dense_sift: true,
-                    // clustering: 'kmeans'
+                this.axios.post('/train-svm', {
+                    detections: [this.state.rectStartX, this.state.rectStartY],
+                    image: this.getCanvasScreenshot().substr('data:image/png;base64,'.length),
+                    positive_crop: this.getCroppedCanvasScreenshot().substr('data:image/png;base64,'.length),
+                    use_dense_sift: true,
+                    augment_data: false,
+                    clustering: 'kmeans'
                 })
                 .then(data => {
                     if (data.error) {
                         Materialize.toast('Error occured on a detection server');
+                        this.setState({
+                            ...this.state,
+                            processingVideo: false
+                        });
                         throw new Meteor.Error('/train-svm returned error object');
                     } else {
                         this.setState({
@@ -140,7 +157,13 @@ class CanvasVideoEditor extends Component {
                         );
                     }
                 })
-                .catch(e => Materialize.toast(`Error occured while training SVM: ${e.message}`, 4000))
+                .catch(e => {
+                    Materialize.toast(`Error occured while training SVM: ${e.message}`, 4000)
+                    this.setState({
+                        ...this.state,
+                        processingVideo: false
+                    });
+                });
             } else {
                 Materialize('Choose a detection object, please!', 4000);
                 return;
@@ -164,23 +187,30 @@ class CanvasVideoEditor extends Component {
         }
     }
 
-    renderClassListItems() {
+    renderClassSelectOptions() {
         return this.props.classes.map((item, index) =>
-            <li key={index}><a>{item}</a></li>
-        );
+            <option key={index} value={item}>{item}</option>
+        ); 
     }
 
-    handleDropDownClick(e) {
+    handleClassSelect() {
         this.setState({
             ...this.state,
-            currentClass: e.target.innerHTML
+            currentClass: this.refs.classSelect.value
+        });
+    }
+
+    handleActionsSelect() {
+        this.setState({
+            ...this.state,
+            currentRecognitionAction: this.refs.actionsSelect.value
         });
     }
 
     handleSelectionDetection() {
         console.log('Start detection process');
         this.axios.post('/detect', {
-            image: this.getCroppedCanvasScreenshot().substr('data:image/jpeg;base64,'.length)
+            image: this.getCroppedCanvasScreenshot().substr('data:image/png;base64,'.length)
         }).then(({data}) => {
             if (data.detections) {
                 for (let { x, y, width, height, prediction, score } of data.detections) {
@@ -197,26 +227,34 @@ class CanvasVideoEditor extends Component {
                     currentClass: data.detections[0].prediction,
                     detections: data.detections[0]
                 });
+
+                this.refs.classSelect.value = data.detections[0].prediction;
             }
-        });
+        }).catch(console.log);
     }
 
     renderOnRecognitionItems() {
-        return this.onRecognitionActions.map((item, index) =>
+        return this.state.onRecognitionActions.map((item, index) =>
             <li key={index}><a>{item}</a></li>
         );
+    }
+
+    renderActionsSelectOptions() {
+        return this.state.onRecognitionActions.map((item, index) =>
+            <option key={index} value={item}>{item}</option>
+        ); 
     }
 
     renderActionInputFields() {
         return (
             <div className="row">
-                <form className="col s12" ref='actionFormData'>
+                <form className="col s12" ref='actionFormData' id="action-inputs-form">
                     {
                         this.state.currentRecognitionAction == 'popup'
                         ? (
                             <div className="row">
                                 <div className="input-field col s12">
-                                    <input type="text" id="popup-text"/>
+                                    <input type="text" id="popup-text" name="popup-text" />
                                     <label htmlFor="popup-text">Popup Text</label>
                                 </div>
                             </div>
@@ -224,11 +262,11 @@ class CanvasVideoEditor extends Component {
                         ? (
                             <div className="row">
                                 <div className="input-field col s12">
-                                    <input type="text" id="modal-header"/>
+                                    <input type="text" id="modal-header" name="modal-header"/>
                                     <label htmlFor="modal-header">Modal Header</label>
                                 </div>
                                 <div className="input-field col s12">
-                                    <input type="text" id="modal-header"/>
+                                    <input type="text" id="modal-header" name="modal-header"/>
                                     <label htmlFor="modal-header">Modal Header</label>
                                 </div>
                             </div>
@@ -236,13 +274,67 @@ class CanvasVideoEditor extends Component {
                         ? (
                             <div className="row">
                                 <div className="input-field col s12">
-                                    <input type="text" id="redirect-url"/>
+                                    <input type="text" id="redirect-url" name="redirect-url"/>
                                     <label htmlFor="redirect-url">Redirect URL</label>
                                 </div>
                             </div>
                         ) : ''
                     }
                 </form>
+            </div>
+        );
+    }
+
+    renderLoader() {
+        return (
+            <div className="preloader-wrapper big active" style={{margin: '20% 10% 0% 25%'}}>
+                <div className="spinner-layer spinner-blue">
+                    <div className="circle-clipper left">
+                        <div className="circle" />
+                    </div>
+                    <div className="gap-patch">
+                        <div className="circle" />
+                    </div>
+                    <div className="circle-clipper right">
+                        <div className="circle" />
+                    </div>
+                </div>
+
+                <div className="spinner-layer spinner-red">
+                    <div className="circle-clipper left">
+                        <div className="circle" />
+                    </div>
+                    <div className="gap-patch">
+                        <div className="circle" />
+                    </div>
+                    <div className="circle-clipper right">
+                        <div className="circle" />
+                    </div>
+                </div>
+
+                <div className="spinner-layer spinner-yellow">
+                    <div className="circle-clipper left">
+                        <div className="circle" />
+                    </div>
+                    <div className="gap-patch">
+                        <div className="circle" />
+                    </div>
+                    <div className="circle-clipper right">
+                        <div className="circle" />
+                    </div>
+                </div>
+
+                <div className="spinner-layer spinner-green">
+                    <div className="circle-clipper left">
+                        <div className="circle" />
+                    </div>
+                    <div className="gap-patch">
+                        <div className="circle" />
+                    </div>
+                    <div className="circle-clipper right">
+                        <div className="circle" />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -255,14 +347,13 @@ class CanvasVideoEditor extends Component {
     }
 
     render() {
+        const cursor = {
+            cursor: this.state.dragSelection ? 'crosshair' : 'default'
+        };
 
         const videoSrc = {
             src: this.props.video.url,
             type: 'video/mp4'
-        };
-
-        const cursor = {
-            cursor: this.state.dragSelection ? 'crosshair' : 'default'
         };
 
         return (
@@ -300,49 +391,52 @@ class CanvasVideoEditor extends Component {
                         Pause
                     </button>
                 </div>
-                <div className="col s6" style={{paddingLeft: '10%'}}>
-                    <h3>Recognition Setup</h3>
-                    <p className="flow-text">Class: {this.state.currentClass}</p>
-                    <a className="dropdown-button btn" data-activates="classes-dropdown">
-                        Choose a class to track
-                    </a>
-                    <ul
-                        id="classes-dropdown"
-                        className="dropdown-content"
-                        onClick={::this.handleDropDownClick}
-                    >
-                        {::this.renderClassListItems()}
-                    </ul>
-                    <br />
-                    <br />
-                    <button
-                        onClick={::this.handleSelectionDetection}
-                        className="waves-effect waves-light btn">
-                        Run Detection
-                    </button>
-                    <br/>
-                    <br/>
-                    <div className="recognition-actions">
-                        <h4>Choose onRecognition action</h4>
-                        <ul
-                            id="classes-dropdown"
-                            className="dropdown-content"
-                            onClick={::this.handleActionsDropDownClick}
-                        >
-                            {::this.renderOnRecognitionItems()}
-                        </ul>
-                    </div>
-                    {::this.renderActionInputFields()}
-                    <br/>
-                    <button
-                        onClick={::this.saveRecognitionAction}
-                        className="waves-effect waves-light btn">
-                        Save
-                    </button>
-                </div>
+                {
+                    !this.state.processingVideo && this.props.video
+                    ?
+                        (<div className="col s6" style={{paddingLeft: '10%'}}>
+                            <h3>Recognition Setup</h3>
+                            <p className="flow-text">Class: {this.state.currentClass}</p>
+                            <label>Choose a class to track</label>
+                            <div className="input-field row" style={{margin: '5% 0 10% 0'}}>
+                                <select
+                                    ref="classSelect"
+                                    defaultValue="__background__"
+                                    className="browser-default"
+                                    onChange={::this.handleClassSelect}
+                                >
+                                    {::this.renderClassSelectOptions()}
+                                </select>
+                            </div>
+                            <button
+                                onClick={::this.handleSelectionDetection}
+                                className="waves-effect waves-light btn">
+                                Run Detection
+                            </button>
+                            <br/><br/>
+                            <label>Choose onRecognition Action</label>
+                            <div className="input-field row" style={{margin: '5% 0 10% 0'}}>
+                                <select
+                                    ref="actionsSelect"
+                                    defaultValue="popup"
+                                    className="browser-default"
+                                    onChange={::this.handleActionsSelect}
+                                >
+                                    {::this.renderActionsSelectOptions()}
+                                </select>
+                            </div>
+                            {::this.renderActionInputFields()}
+                            <button
+                                onClick={::this.saveRecognitionAction}
+                                className="waves-effect waves-light btn">
+                                Save
+                            </button>
+                        </div>)
+                    : (::this.renderLoader())
+                }
             </div>
         );
     }
 }
 
-export default CanvasVideoEditor;
+export default withRouter(CanvasVideoEditor);
